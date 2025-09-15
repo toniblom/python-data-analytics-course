@@ -6,6 +6,10 @@ Created: 2025-09-15
 
 Original [Google Colab file](https://colab.research.google.com/drive/1Vzr6uneZcaf0LvN0MVnRhBa1fgQoOau7?usp=sharing) (in Finnish).
 
+This assignment has two parts:
+* A dataset based on the passengers of Titanic
+* A dataset of Finnish municipalities including various demographic and economic indicators
+
 ## Preparing the environment
 
 ```python
@@ -25,7 +29,7 @@ import seaborn as sns
 sns.set_style('white')
 ```
 
-## Data set 1: Titanic
+## Part 1: Titanic
 
 ```python
 # Import titanic data to Colab from Excel file
@@ -57,7 +61,7 @@ dft.info()
 
 Of the columns used in this assignment, the age column has some missing values.
 
-Let's try to filter the data:
+Let's try filtering the data:
 
 ```python
 # Show male passengers that embarked in Cherbourg, travelled in 2nd class and survived
@@ -266,9 +270,237 @@ dft6.style.format('{:.1f} %')
 
 * There was a higher percentage of female passengers in the 1st class (44.6%) compared to either 2nd class (38.3%) or 3rd class (30.5%).
 
+## Part 2: Finnish Municipalities
 
+Let's get take a look at what the data set looks like:
 
+```python
+# Load the data to Colab and show the first 5 rows
+dfk = pd.read_excel('kunnat.xlsx')
+dfk.head()
+```
 
+<img width="841" height="238" alt="image" src="https://github.com/user-attachments/assets/94202901-9051-4285-84c3-bbedf3958dd9" />
 
+```python
+# What is the size of the dataset? 309 rows, 33 columns
+dfk.shape
+```
 
+```python
+# Show information on the columns
+dfk.info()
+```
+
+<img width="758" height="573" alt="image" src="https://github.com/user-attachments/assets/88e852ad-1cbb-43a0-819e-d44bb42b9d9f" />
+
+* There are no missing values in the data set.
+* The data set headers will be translated in this report when necessary.
+
+### Filtering
+
+Let's examine the smallest municipalities by population count ("Väkiluku, 2021") in Finland:
+
+```python
+# Show 5 smallest municipalities by population count
+dfk.nsmallest(5, 'Väkiluku, 2021')
+```
+
+<img width="866" height="237" alt="image" src="https://github.com/user-attachments/assets/c1cdb3a5-e747-4625-bcf4-fa0c5c8e9d56" />
+
+* Many of the smallest municipalities in Finland are located in the Åland archipelago. These municipalities also have a high percentages of Swedish speaking population ("Ruotsinkielisten osuus väestöstä, %, 2021).
+
+Let's filter the smallest municipalities by population count where the percentage of Swedish speaking population is less than 50%.
+
+```python
+# Filter 5 smallest municipalities by population count where Swedish speaking population is less than 50%
+dfk[dfk['Ruotsinkielisten osuus väestöstä, %, 2021']<50].nsmallest(5, 'Väkiluku, 2021')
+```
+
+<img width="864" height="241" alt="image" src="https://github.com/user-attachments/assets/1b9c124b-b250-4711-824a-634b133d3541" />
+
+Let's examine the municipalities where the population has been growing the most ("Väkiluvun muutos edellisestä vuodesta, %, 2021"):
+
+```python
+# Filter 5 municipalities with the highest population growth
+dfk.nlargest(5, 'Väkiluvun muutos edellisestä vuodesta, %, 2021')
+```
+
+<img width="856" height="235" alt="image" src="https://github.com/user-attachments/assets/7912a753-3705-4a77-a3cf-332eb0634e6d" />
+
+Let's examine the municipalities with highest percentages of foreign citizens ("Ulkomaan kansalaisten osuus väestöstä, %, 2021"):
+
+```python
+# Filter 5 municipalities with the highest percentage of foreign citizens
+dfk.nlargest(5, 'Ulkomaan kansalaisten osuus väestöstä, %, 2021')
+```
+
+<img width="857" height="238" alt="image" src="https://github.com/user-attachments/assets/49ae8513-68d1-44fb-bbf8-f01d7bbd1bd7" />
+
+* The highest percentages of foreign citizens are in municipalities with small population counts in the Åland archipelago.
+
+Let's examine the municipalities with highest percentages of foreign citizens where the total population count is over 1000 and the percentage of Swedish speaking population is less than50 %:
+
+```python
+# Filter 5 municipalities with the highest percentage of foreign citizens where total population count is over 1000 and Swedish speaking population is less than 50%
+dfk[(dfk['Ruotsinkielisten osuus väestöstä, %, 2021']< 50)&(dfk['Väkiluku, 2021']>=1000)].nlargest(5, 'Ulkomaan kansalaisten osuus väestöstä, %, 2021')
+```
+
+<img width="856" height="238" alt="image" src="https://github.com/user-attachments/assets/d8fdecf8-32fe-4325-9b3a-65fcb411ad09" />
+
+* Many of the municipalities in this filtering are located in the capital region of Finland.
+
+Let's examine the municipalities with highest social and health service expenditures per capita ("Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020").
+
+```python
+# Filter 5 municipalities with highest social and health service expenditures per capita
+dfk.nlargest(5, 'Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020')
+```
+
+* Many of these municipalities are located in Northern Finland.
+
+### Statistical key values and distributions
+
+#### Population count
+
+Let's examine statistical key values of the population counts of all municipalities:
+
+```python
+# Show statistical key values of population counts
+dfk['Väkiluku, 2021'].describe()
+```
+
+<img width="188" height="266" alt="image" src="https://github.com/user-attachments/assets/532cd30b-a781-4dbb-ad55-7b8d952c5104" />
+
+* The average population count is 17 955, median 5 967, minimum 105 and maximum 658 547.
+
+Let's examine the distribution of population counts with a histogram:
+
+```python
+# Create histogram showing population count distributions in different municipalities
+sns.histplot(data=dfk['Väkiluku, 2021'])
+plt.ylabel(f'Lukumäärä, n = {dfk.shape[0]}')
+plt.grid(axis='x')
+```
+
+<img width="496" height="349" alt="image" src="https://github.com/user-attachments/assets/2b3e3ff5-b708-4cea-aecb-13c669b0bbe6" />
+
+* There is a lot of variety in the population counts. However, the majority of the municipalities are small, with population counts of less than 10 000.
+
+#### Social and health service expenditures
+
+Let's examine statistical key values of social and health service expenditures per capita of all municipalities:
+
+```python
+# Show statistical key values of social and health service expenditures
+dfk['Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020'].describe()
+```
+
+<img width="594" height="264" alt="image" src="https://github.com/user-attachments/assets/ebc7c566-3a87-447a-b7fa-5fb0af793792" />
+
+* The average social and health service expenditures per capita were 4065.81, the median 4010.60, the minimum 1221.90 and the maximum 6778.70 euros per capita.
+
+Let's create a categorical variable based on social and health service expenditures and add this to the data frame:
+
+```python
+# Choose limits for categories based on minimum and maximum values
+rajat = [1000, 2000, 3000, 4000, 5000, 6000, 7000]
+
+# Add a new column for social and health service expenditure class to data frame
+dfk['st_kust_luok'] = pd.cut(dfk['Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020'], bins=rajat, right=False)
+
+# Create a frequency table for social and health service expenditure class
+dfk1 = pd.crosstab(dfk['st_kust_luok'], 'f')
+dfk1.columns.name = ''
+
+# Add percentage column and some styling to frequency table
+n_kl = dfk1['f'].sum()
+dfk1['%'] = dfk1['f']/n_kl*100
+
+dfk1.style.format({'f' : '{:.0f}', '%' : '{:.1f}'})
+```
+
+<img width="195" height="207" alt="image" src="https://github.com/user-attachments/assets/f9e26fbb-50b6-419d-abe9-e560d610c208" />
+
+* The most common social and health service expenditure class is 3000 - 4000 euros per capita (39.2%).
+
+Let's create a histogram to visualize this distribution:
+
+```python
+sns.histplot(data=dfk['Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020'], bins=rajat)
+plt.ylabel(f'Lukumäärä, n = {n_kl}')
+plt.xlabel('Sosiaali- ja terveystoiminta, nettokäyttökustannukset, eur/asukas')
+plt.show()
+```
+
+<img width="492" height="351" alt="image" src="https://github.com/user-attachments/assets/5f640f20-5ad9-42c0-853a-72e7d7106877" />
+
+### Correlations
+
+#### Social and health service expenditures and the percentage of population over 64 years old
+
+Let's examine whether social and health service expenditures correlate with the percentage of population over 64 years old in Finnish municipalities:
+
+```python
+# Create a scatterplot
+sns.scatterplot(data=dfk, x='Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020', y='Yli 64-vuotiaiden osuus väestöstä, %, 2021')
+plt.xlabel('Sosiaali- ja terveystoiminta, nettokäyttökustannukset, eur/asukas')
+plt.show()
+```
+
+<img width="490" height="350" alt="image" src="https://github.com/user-attachments/assets/4a5b3b9d-b9ad-4e18-8ee5-115f2145b8d7" />
+
+* Based on the shape of the scatterplot it can be anticipated that social and health service expenditures and the percentage of population over 64 years old have a positive correlation.
+
+```python
+# Count correlation coefficient
+dfk['Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020'].corr(dfk['Yli 64-vuotiaiden osuus väestöstä, %, 2021'])
+```
+
+<img width="171" height="30" alt="image" src="https://github.com/user-attachments/assets/e5767691-6304-4fea-b6a6-53e0987a8863" />
+
+* The correlation coefficient of 0.77 confirms a relatively strong positive correlation.
+
+```python
+# Use pearsonr test to determine if the correlation is statistically significant
+from scipy.stats import pearsonr
+pearsonr(dfk['Sosiaali- ja terveystoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020'], dfk['Yli 64-vuotiaiden osuus väestöstä, %, 2021'])
+```
+
+<img width="505" height="29" alt="image" src="https://github.com/user-attachments/assets/9ee8fd78-c2e3-4fc8-a6dc-decc506099e5" />
+
+* According to PearsonR test social and health service expenditures and the percentage of population over 64 years old have a positive correlation (r=0.77) and this correlation is statistically significant (p<0.01).
+
+#### Percentage of Swedish-speaking population and education and culture expenditures
+
+Let's examine whether the percentage of Swedish-speaking population correlates with education and culture expenditures per capita in Finnish municipalities:
+
+```python
+# Create a scatterplot
+sns.scatterplot(data=dfk, x='Opetus- ja kulttuuritoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020', y='Ruotsinkielisten osuus väestöstä, %, 2021')
+plt.xlabel('Opetus- ja kulttuuritoiminta, nettokäyttökustannukset, eur/asukas')
+plt.show()
+```
+
+<img width="484" height="351" alt="image" src="https://github.com/user-attachments/assets/7070ed4e-cc28-4865-af0d-6fd220a83c1c" />
+
+* Based on the scatterplot, it is difficult to establish a clear correlation.
+
+```python
+# Count correlation coefficient
+dfk['Opetus- ja kulttuuritoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020'].corr(dfk['Ruotsinkielisten osuus väestöstä, %, 2021'])
+```
+
+<img width="151" height="27" alt="image" src="https://github.com/user-attachments/assets/e2df2df6-56a1-4db3-95a7-73358bbe562b" />
+
+* The correlation coefficient shows a weak positive correlation (r=0.35)
+
+```python
+# Use pearsonr test to determine if the correlation is statistically significant
+pearsonr(dfk['Opetus- ja kulttuuritoiminta yhteensä, nettokäyttökustannukset, euroa/asukas, 2020'], dfk['Ruotsinkielisten osuus väestöstä, %, 2021'])
+```
+
+<img width="519" height="27" alt="image" src="https://github.com/user-attachments/assets/62219401-6e66-488c-aeea-bb03135ccc38" />
+
+* According to PearsonR test the weak positive correlation (r=0.35) is statistically significant (p<0.01).
 
